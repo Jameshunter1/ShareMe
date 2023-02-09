@@ -1,0 +1,7 @@
+{
+    "eslint.quiet": false,
+    "eslint.workingDirectories": [
+    "./shareme_backend",
+    "./shareme_frontend"
+    ]
+}
