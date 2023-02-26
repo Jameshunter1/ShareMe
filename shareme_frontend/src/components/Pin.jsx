@@ -8,40 +8,43 @@ import { AiTwotoneDelete } from 'react-icons/ai';
 import { BsFillArrowUpRightCircleFill } from 'react-icons/bs';
 import UserProfile from './UserProfile';
 
-const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
+const Pin = ({ pin }) => {
   // State hooks to track hover and saving state
   const [postHovered, setPostHovered] = useState(false);
-
+  const [savingPost, setSavingPost] = useState(false);
 
   // Initializes navigation hook
   const navigate = useNavigate();
 
+  const { postedBy, image, _id, destination, save } = pin;
+  
   // Fetches user from the backend
   const user = fetchUser();
 
   // Determines if post has already been saved by the user
-  const alreadySaved = !!(save?.filter((item) => item.postedBy._id === user?.googleId))?.length
+  let alreadySaved = pin?.save?.filter((item) => item?.postedBy?._id === user?.googleId);
   
   
   const savePin = (id) => {
     if (!alreadySaved) {
-    
+      setSavingPost(true);
+
       client
         .patch(id)
         .setIfMissing({ save: [] })
-        .insert("after", "save [-1]", [{
+        .insert("after", "save[-1]", [{
           _key: uuidv4(),
-          userId :user.googleId,
+          userId :user?.googleId,
           postedBy: {
             _type: "postedBy",
-            _ref:user.googleId
+            _ref:user?.googleId
           }
            
         }])
         .commit()
         .then(() => {
         window.location.reload();
-       
+       setSavingPost(false)
       })
   }
   }
@@ -51,6 +54,8 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
       .then(() => 
     window.location.reload())
   }
+ 
+ 
 
   return (
     <div className='m-2'>
@@ -76,27 +81,36 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
                 </a>
               </div>
               {/* Render 'Save' or 'Saved' button based on whether the post has already been saved */}
-              {alreadySaved ? (
-                <button type="button" className='bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none'>
-                  {save?.length} Saved
+              {alreadySaved?.length !== 0 ? (
+                <button type="button" className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none">
+                  {pin?.saved?.length}Saved
                 </button>
-              ) :
-                <button type="button" className='bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none'
+              ) : (
+                <button
                   onClick={(e) => {
-                    e.stopPropagation()
-                  }}>Save</button>}
-            </div>
-            <div className='flex justify-between items-center gap-2 w-full'>
-              {destination && (
-                <a
-                  href={destination.length > 20 ? destination.slice(8, 20) : destination.slice(8)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className='bg-white flex items-center gap-2 text-black font-bold p-2 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md'>
-                  <BsFillArrowUpRightCircleFill />
-                </a>
-            
+                    e.stopPropagation();
+                    savePin(_id);
+                  }}
+                  type="button"
+                  className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none"
+                >
+                  {pin?.save?.length}   {savingPost ? 'Saving' : 'Save'}
+                </button>
               )}
+            </div>
+            <div className=" flex justify-between items-center gap-2 w-full">
+              {destination?.slice(8).length > 0 ? (
+                <a
+                  href={destination}
+                  target="_blank"
+                  className="bg-white flex items-center gap-2 text-black font-bold p-2 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md"
+                  rel="noreferrer"
+                >
+                  {' '}
+                  <BsFillArrowUpRightCircleFill />
+                  {destination?.slice(8, 17)}...
+                </a>
+              ) : undefined}
               {postedBy?._id === user?.googleId && (
                 <button type="button" className='bg-white p-2 opacity-70 hover:opacity-100 font-bold text-dark rounded-3xl hover:shadow-md outline-none'
                   onClick={(e) => {
