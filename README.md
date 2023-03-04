@@ -1,3 +1,6 @@
+A Full Stack Social Media Application built using React, Tailwind, and Sanity. The goal of the project is to create a fully responsive UI/UX website that allows users to interact with one another through various social media features.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
